@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vokabeltrainer Fragen und Antworten</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .trainer {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .feedback {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .radio-group {
+      margin-bottom: 1rem;
+    }
+    .solution {
+      margin-top: 1rem;
+      font-size: 1.7rem;
+    }
+    .counter, .score {
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="trainer">
+    <h2>Fragen und Antworten Trainer</h2>
+
+    <div class="radio-group">
+      <label><input type="radio" name="direction" value="de-en" checked> Deutsch → Englisch</label><br />
+      <label><input type="radio" name="direction" value="en-de"> Englisch → Deutsch</label>
+    </div>
+
+    <button onclick="startTrainer()">Start</button>
+
+    <div class="counter" id="counter"></div>
+    <div class="score" id="score"></div>
+
+    <div id="word" style="font-size: 1.5rem; margin: 1rem 0;"></div>
+
+    <button id="solutionBtn" onclick="showSolution()" disabled>Lösung anzeigen</button>
+    <div class="solution" id="solution"></div>
+  </div>
+
+  <script>
+    const vocab = [
+      { de: "Wie heißt du?", en: "What is your name?" },
+      { de: "Wie alt bist du?", en: "How old are you?" },
+      { de: "Woher kommst du?", en: "Where are you from?" },
+      { de: "Was machst du?", en: "What do you do?" },
+      { de: "Magst du Sport?", en: "Do you like sports?" },
+      { de: "Was ist dein Lieblingsessen?", en: "What is your favorite food?" },
+      { de: "Wo wohnst du?", en: "Where do you live?" },
+      { de: "Wie spät ist es?", en: "What time is it?" },
+      { de: "Sprichst du Englisch?", en: "Can you speak English?" },
+      { de: "Hast du Haustiere?", en: "Do you have any pets?" },
+      { de: "Wie viele Geschwister hast du?", en: "How many brothers and sisters do you have?" },
+      { de: "Was ist deine Lieblingsfarbe?", en: "What is your favorite color?" },
+      { de: "Liest du gerne Bücher?", en: "Do you like reading books?" },
+      { de: "Wie ist das Wetter heute?", en: "What is the weather like today?" },
+      { de: "Was machst du gerade?", en: "What are you doing now?" },
+      { de: "Warst du schon mal in London?", en: "Have you been to London?" },
+      { de: "Welche Musik magst du?", en: "What kind of music do you like?" },
+      { de: "Reist du gerne?", en: "Do you like to travel?" },
+      { de: "Was ist dein Lieblingsfilm?", en: "What’s your favorite movie?" },
+      { de: "Wie geht's dir?", en: "How are you today?" }
+    ];
+
+    let remainingWords = [];
+    let currentWord = null;
+    let score = 0;
+
+    function getDirection() {
+      return document.querySelector('input[name="direction"]:checked').value;
+    }
+
+    function updateCounter() {
+      const total = vocab.length;
+      const done = total - remainingWords.length;
+      document.getElementById("counter").innerText = `Aufgabe ${done + 1} von ${total}`;
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = `Gelöst: ${score}`;
+    }
+
+    function pickWord() {
+      if (remainingWords.length === 0) {
+        document.getElementById("word").innerText = "🎉 Ende! Alle 20 Fragen wurden beantwortet.";
+        document.getElementById("solution").innerText = `Gesamt gelöst: ${score} von 20.`;
+        document.getElementById("solutionBtn").style.display = "none";
+        return;
+      }
+
+      const direction = getDirection();
+      const index = Math.floor(Math.random() * remainingWords.length);
+      currentWord = remainingWords.splice(index, 1)[0];
+
+      document.getElementById("solution").innerText = "";
+      document.getElementById("word").innerText =
+        direction === "de-en" ? currentWord.de : currentWord.en;
+
+      document.getElementById("solutionBtn").disabled = false;
+      updateCounter();
+      updateScore();
+    }
+
+    function showSolution() {
+      if (!currentWord) return;
+      const direction = getDirection();
+      const solutionText = direction === "de-en" ? currentWord.en : currentWord.de;
+      document.getElementById("solution").innerText = `Lösung: ${solutionText}`;
+      score++;
+      document.getElementById("solutionBtn").disabled = true;
+      updateScore();
+      setTimeout(pickWord, 4000);
+    }
+
+    function startTrainer() {
+      remainingWords = [...vocab];
+      score = 0;
+      document.getElementById("solutionBtn").style.display = "inline-block";
+      document.getElementById("solution").innerText = "";
+      document.getElementById("word").innerText = "";
+      pickWord();
+    }
+
+    document.querySelectorAll('input[name="direction"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        startTrainer();
+      });
+    });
+  </script>
+</body>
+</html>
